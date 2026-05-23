@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/inventario_abarrote_db
+    username: admin
+    password: admin_password
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+
