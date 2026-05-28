@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 public class CategoriaMapper {
 
     // De DTO a Entidad
+    // Recibiré un DTO y devolveré una entidad Categoria
     public Categoria toEntity(CategoriaRequestDTO dto) {
         Categoria categoria = new Categoria();
         categoria.setNombre(dto.nombre()); // en records el getter es el mismo nombre de la variable
@@ -16,6 +17,7 @@ public class CategoriaMapper {
     }
 
     // De Entidad a DTO
+    // Recibiré una entidad y devolveré un DTO de respuesta.
     public CategoriaResponseDTO toResponse(Categoria entity) {
         return new CategoriaResponseDTO(
                 entity.getId(),

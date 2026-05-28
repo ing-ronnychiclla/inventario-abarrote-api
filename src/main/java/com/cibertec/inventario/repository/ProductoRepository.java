@@ -15,7 +15,7 @@ public interface ProductoRepository extends JpaRepository<Producto, UUID> {
     Optional<Producto> findByCodigoBarras(String codigoBarras);
 
     // Para mostrar un catalogo filtrado en el frontend
-    List<Producto> findByCodigoBarras(UUID categoriaId);
+    List<Producto> findByCategoriaId(UUID categoriaId);
 
     // Buscar productos por nombre (buscador general)
     // El "ContainingIgnoreCase" hace que funcione como un "LIKE %nombre%" insensible a mayúsculas
