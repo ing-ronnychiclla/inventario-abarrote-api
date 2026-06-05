@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/inventario_abarrote_db
-    username: postgres
-    password: "123456"
+    username: admin
+    password: admin123
 
   jpa:
     hibernate:
