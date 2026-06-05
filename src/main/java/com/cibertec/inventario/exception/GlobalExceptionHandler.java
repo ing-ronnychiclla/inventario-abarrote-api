@@ -47,6 +47,7 @@ public class GlobalExceptionHandler {
     }
 
     // 3. Atrapa CUALQUIER otro error no previsto (ej. caida de base de datos)
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGeneralException(Exception ex) {
         ErrorResponseDTO error = new ErrorResponseDTO(
                 "Ocurrio un error interno en el servidor",
