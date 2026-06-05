@@ -228,25 +228,41 @@ erDiagram
 ### Requisitos Previos
 * **Java Development Kit (JDK) 21** o superior instalado.
 * **Maven 3.9+** (o usar el wrapper `./mvnw` incluido).
-* **PostgreSQL** en ejecución local o remota.
+* **Docker y Docker Compose** (opcional, para levantar la base de datos fácilmente).
+* **PostgreSQL** en ejecución local o remota (si no se usa Docker).
 
 ### 1. Configuración de Base de Datos
-Crea una base de datos en PostgreSQL llamada `inventario_abarrote_db`.
-Si es necesario cambiar las credenciales de conexión o el puerto de PostgreSQL, modifica el archivo [application.yaml](file:///home/ronny-linux/Documents/Projects/Backend/inventario-abarrote/src/main/resources/application.yaml):
 
+#### Opción A: Usando Docker Compose (Recomendado)
+El proyecto incluye un archivo [docker-compose.yml](file:///C:/Users/ronny/Documents/Projects/Backend/inventario-abarrote-api/docker-compose.yml) listo para levantar un contenedor con PostgreSQL 16:
+
+```bash
+docker compose up -d
+```
+
+Esto iniciará automáticamente una base de datos PostgreSQL llamada `inventario_abarrote_db` en el puerto `5432` con las credenciales por defecto configuradas en el proyecto:
+* **Usuario:** `admin`
+* **Contraseña:** `admin123`
+
+#### Opción B: PostgreSQL Local
+Si prefieres usar una instalación local de PostgreSQL:
+1. Crea una base de datos llamada `inventario_abarrote_db`.
+2. Asegúrate de que las credenciales de conexión coincidan con las configuradas en [application.yaml](file:///C:/Users/ronny/Documents/Projects/Backend/inventario-abarrote-api/src/main/resources/application.yaml).
+
+Las credenciales actuales configuradas en [application.yaml](file:///C:/Users/ronny/Documents/Projects/Backend/inventario-abarrote-api/src/main/resources/application.yaml) son:
 ```yaml
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/inventario_abarrote_db
-    username: tu_usuario_postgres
-    password: tu_contraseña_postgres
+    username: admin
+    password: admin123
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
 ```
 
-*Nota: La configuración `ddl-auto: update` generará y actualizará automáticamente las tablas en el primer arranque del servidor sin necesidad de scripts manuales.*
+*Nota: La configuración `ddl-auto: update` generará y actualizará automáticamente las tablas en el primer arranque del servidor sin necesidad de ejecutar scripts manuales.*
 
 ### 2. Compilar el Proyecto
 Ejecuta el siguiente comando para limpiar el directorio de build y compilar las dependencias del proyecto:
@@ -272,12 +288,15 @@ Para correr los tests unitarios y de integración configurados:
 
 ## 💎 Características Destacadas y Buenas Prácticas
 
-* **Java Records**: Uso extensivo de `record` para todos los DTOs, garantizando inmutabilidad y reduciendo la complejidad del código.
+* **Manejo Global de Excepciones**: Implementado a través de [GlobalExceptionHandler](file:///C:/Users/ronny/Documents/Projects/Backend/inventario-abarrote-api/src/main/java/com/cibertec/inventario/exception/GlobalExceptionHandler.java), centralizando la captura de errores en la API. Transforma fallos de lógica de negocio o errores de validación sintáctica en respuestas estandarizadas usando el record [ErrorResponseDTO](file:///C:/Users/ronny/Documents/Projects/Backend/inventario-abarrote-api/src/main/java/com/cibertec/inventario/dto/ErrorResponseDTO.java), el cual provee estructura con mensajes detallados y marcas de tiempo (`timestamp`).
+* **Configuración de CORS**: Habilitado a través de [CorsConfig](file:///C:/Users/ronny/Documents/Projects/Backend/inventario-abarrote-api/src/main/java/com/cibertec/inventario/config/CorsConfig.java) para permitir la comunicación fluida con clientes frontend (por ejemplo, aplicaciones Angular corriendo en `http://localhost:4200`). Permite mapeo de rutas bajo `/api/v1/**` con soporte completo para verbos HTTP como `GET`, `POST`, `PUT`, `DELETE` y pre-flights `OPTIONS`.
+* **Contenedorización con Docker**: Configuración del entorno de base de datos automatizado mediante [docker-compose.yml](file:///C:/Users/ronny/Documents/Projects/Backend/inventario-abarrote-api/docker-compose.yml), asegurando consistencia y facilidad de despliegue local para el motor de PostgreSQL.
+* **Java Records**: Uso de `record` para todos los DTOs, garantizando inmutabilidad y reduciendo la complejidad del código.
 * **Validación Declarativa (Jakarta Validation)**: Validación robusta a nivel de API para evitar datos incoherentes (por ejemplo, precios menores a cero, nombres vacíos o fechas de expiración en el pasado).
-* **Preparación para FEFO**: Contiene consultas optimizadas preparadas en el `LoteRepository` para priorizar lotes próximos a vencer a la hora de procesar ventas o salidas de mercadería:
+* **Preparación para FEFO**: Contiene consultas optimizadas preparadas en el [LoteRepository](file:///C:/Users/ronny/Documents/Projects/Backend/inventario-abarrote-api/src/main/java/com/cibertec/inventario/repository/LoteRepository.java) para priorizar lotes próximos a vencer a la hora de procesar ventas o salidas de mercadería:
   ```java
   @Query("SELECT l FROM Lote l WHERE l.producto.id = :productoId AND l.cantidadActual > 0 ORDER BY l.fechaVencimiento ASC")
   List<Lote> findLotesConStockPorProducto(@Param("productoId") UUID productoId);
   ```
-* **Lombok**: Simplifica los modelos de entidades persistentes con anotaciones constructores y getters sin añadir ruido al código de negocio.
+* **Lombok**: Simplifica los modelos de entidades persistentes con anotaciones de constructores y getters sin añadir ruido al código de negocio.
 * **Control de Transacciones**: Uso estricto de `@Transactional` para garantizar la consistencia en base de datos al realizar operaciones que impactan múltiples tablas (como el ingreso de stock que graba lote y movimiento de kardex a la vez).
