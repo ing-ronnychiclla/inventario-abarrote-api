@@ -2,6 +2,8 @@ package com.cibertec.inventario.controller;
 
 import com.cibertec.inventario.dto.IngresoMercanciaRequestDTO;
 import com.cibertec.inventario.dto.IngresoMercanciaResponseDTO;
+import com.cibertec.inventario.dto.VentaRequestDTO;
+import com.cibertec.inventario.dto.VentaResponseDTO;
 import com.cibertec.inventario.service.InventarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,5 +27,11 @@ public class InventarioController {
 
         IngresoMercanciaResponseDTO response = inventarioService.registrarIngreso(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/ventas")
+    public ResponseEntity<VentaResponseDTO> registrarVenta(@Valid @RequestBody VentaRequestDTO request) {
+        VentaResponseDTO response = inventarioService.registrarVenta(request);
+        return ResponseEntity.ok(response);
     }
 }
